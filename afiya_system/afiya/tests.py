@@ -1,20 +1,24 @@
-# /home/juma-samwel-onyango/Software Engineering Intern Task/afiya_system/afiya/tests.py
 from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase # Use DRF's test case
+from django.contrib.auth.models import User # Import User model
+from rest_framework import status, serializers
+from rest_framework.test import APITestCase
 from .models import Program, Client
 import datetime
 
 class ProgramAPITests(APITestCase):
     def setUp(self):
         """Set up data for program tests."""
+        # Create a user for authentication in tests that need it
+        self.user = User.objects.create_user(username='testuser_program', password='password123')
         self.program1 = Program.objects.create(name="HIV Support")
         self.program2 = Program.objects.create(name="Malaria Prevention")
         self.list_url = reverse('program-list') # URL for list/create
+        # Authenticate the client for this test class by default
+        self.client.force_authenticate(user=self.user)
 
     def test_create_program(self):
         """
-        Ensure we can create a new program object.
+        Ensure authenticated user can create a new program object.
         """
         url = self.list_url
         data = {'name': 'TB Care'}
@@ -35,18 +39,19 @@ class ProgramAPITests(APITestCase):
 
     def test_list_programs(self):
         """
-        Ensure we can list programs.
+        Ensure authenticated user can list programs.
         """
         url = self.list_url
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
-        self.assertEqual(response.data[0]['name'], self.program1.name) # Assuming default ordering by name
+        # Assuming default ordering by name ('HIV Support', 'Malaria Prevention')
+        self.assertEqual(response.data[0]['name'], self.program1.name)
         self.assertEqual(response.data[1]['name'], self.program2.name)
 
     def test_retrieve_program(self):
         """
-        Ensure we can retrieve a specific program.
+        Ensure authenticated user can retrieve a specific program.
         """
         url = reverse('program-detail', kwargs={'pk': self.program1.pk}) # URL for retrieve/update/delete
         response = self.client.get(url, format='json')
@@ -55,7 +60,7 @@ class ProgramAPITests(APITestCase):
 
     def test_update_program(self):
         """
-        Ensure we can update a program (using PUT).
+        Ensure authenticated user can update a program (using PUT).
         """
         url = reverse('program-detail', kwargs={'pk': self.program1.pk})
         updated_data = {'name': 'Updated HIV Support'}
@@ -66,7 +71,7 @@ class ProgramAPITests(APITestCase):
 
     def test_partial_update_program(self):
         """
-        Ensure we can partially update a program (using PATCH).
+        Ensure authenticated user can partially update a program (using PATCH).
         """
         url = reverse('program-detail', kwargs={'pk': self.program1.pk})
         updated_data = {'name': 'Patched HIV Support'}
@@ -77,7 +82,7 @@ class ProgramAPITests(APITestCase):
 
     def test_delete_program(self):
         """
-        Ensure we can delete a program.
+        Ensure authenticated user can delete a program.
         """
         url = reverse('program-detail', kwargs={'pk': self.program1.pk})
         response = self.client.delete(url)
@@ -89,6 +94,8 @@ class ProgramAPITests(APITestCase):
 class ClientAPITests(APITestCase):
     def setUp(self):
         """Set up data for client tests."""
+        # Create a user for authentication
+        self.user = User.objects.create_user(username='testuser_client', password='password123')
         self.program_tb = Program.objects.create(name="TB Care")
         self.program_hiv = Program.objects.create(name="HIV Support")
         self.client1_data = {
@@ -107,10 +114,12 @@ class ClientAPITests(APITestCase):
 
         self.list_url = reverse('client-list') # URL for list/create
         self.search_url = reverse('client-search') # URL for search action
+        # Authenticate the client for this test class by default
+        self.client.force_authenticate(user=self.user)
 
     def test_create_client(self):
         """
-        Ensure we can create a new client.
+        Ensure authenticated user can create a new client.
         """
         url = self.list_url
         new_client_data = {
@@ -139,7 +148,7 @@ class ClientAPITests(APITestCase):
 
     def test_list_clients(self):
         """
-        Ensure we can list clients.
+        Ensure authenticated user can list clients.
         """
         url = self.list_url
         response = self.client.get(url, format='json')
@@ -151,7 +160,7 @@ class ClientAPITests(APITestCase):
 
     def test_retrieve_client(self):
         """
-        Ensure we can retrieve a specific client.
+        Ensure authenticated user can retrieve a specific client.
         """
         url = reverse('client-detail', kwargs={'pk': self.client1.pk})
         response = self.client.get(url, format='json')
@@ -161,7 +170,7 @@ class ClientAPITests(APITestCase):
 
     def test_update_client(self):
         """
-        Ensure we can update a client (using PUT).
+        Ensure authenticated user can update a client (using PUT).
         """
         url = reverse('client-detail', kwargs={'pk': self.client1.pk})
         updated_data = {
@@ -179,7 +188,7 @@ class ClientAPITests(APITestCase):
 
     def test_partial_update_client(self):
         """
-        Ensure we can partially update a client (using PATCH).
+        Ensure authenticated user can partially update a client (using PATCH).
         """
         url = reverse('client-detail', kwargs={'pk': self.client1.pk})
         updated_data = {'contact_info': 'patched1@example.com'} # Only update contact
@@ -191,7 +200,7 @@ class ClientAPITests(APITestCase):
 
     def test_delete_client(self):
         """
-        Ensure we can delete a client.
+        Ensure authenticated user can delete a client.
         """
         url = reverse('client-detail', kwargs={'pk': self.client1.pk})
         response = self.client.delete(url)
@@ -202,7 +211,7 @@ class ClientAPITests(APITestCase):
     # --- Enrollment Tests ---
     def test_enroll_client(self):
         """
-        Ensure we can enroll a client in a program.
+        Ensure authenticated user can enroll a client in a program.
         """
         enroll_url = reverse('client-enroll', kwargs={'pk': self.client1.pk})
         enroll_data = {'program_id': self.program_tb.id}
@@ -219,7 +228,7 @@ class ClientAPITests(APITestCase):
 
     def test_enroll_client_multiple_programs(self):
         """
-        Ensure we can enroll a client in multiple programs.
+        Ensure authenticated user can enroll a client in multiple programs.
         """
         # Enroll in TB first
         enroll_url = reverse('client-enroll', kwargs={'pk': self.client1.pk})
@@ -259,8 +268,10 @@ class ClientAPITests(APITestCase):
         enroll_data = {'program_id': non_existent_program_id}
         response = self.client.post(enroll_url, enroll_data, format='json')
 
+        # Check the view's response - it raises ValidationError now
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('program_id', response.data) # Serializer validation error
+        # Check the specific error message raised by the view
         self.assertIn(f"Program with ID {non_existent_program_id} not found.", str(response.data['program_id']))
         self.client1.refresh_from_db()
         self.assertEqual(self.client1.enrolled_programs.count(), 0) # Should not be enrolled
@@ -326,34 +337,103 @@ class ClientAPITests(APITestCase):
 
     def test_search_client_empty_query_param(self):
         """
-        Ensure search with empty 'q' returns all clients (or handles as defined).
-        Current implementation filters by empty string, likely returning all.
-        Alternatively, could be modified to return 400 or empty list. Let's test current behavior.
+        Ensure search with empty 'q' returns all clients.
         """
+        # The view was updated to handle empty 'q' by returning all clients
         response = self.client.get(self.search_url + '?q=', format='json') # Empty query
-        # Assuming filter(name__icontains='') matches all clients
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2) # Returns all clients
 
-# --- Permissions Tests ---
-# Note: Since no specific permissions are implemented yet (e.g., IsAuthenticated, IsAdminUser),
-# these tests are placeholders or would test the default behavior (likely AllowAny).
-# If you add permissions like `permission_classes = [permissions.IsAuthenticated]` to ViewSets,
-# you would add tests here to verify unauthorized access is denied (401/403)
-# and authorized access is allowed.
-# Example (if IsAuthenticated was added):
-# class PermissionTests(APITestCase):
-#     def test_unauthenticated_access_denied(self):
-#         url = reverse('program-list')
-#         response = self.client.get(url)
-#         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED) # Or 403 depending on DRF settings
-#
-#     def test_authenticated_access_allowed(self):
-#         # You'd need to create a user and authenticate the client
-#         # from django.contrib.auth.models import User
-#         # user = User.objects.create_user('testuser', password='password')
-#         # self.client.login(username='testuser', password='password') # Or use token auth
-#         # url = reverse('program-list')
-#         # response = self.client.get(url)
-#         # self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         pass # Placeholder
+
+class PermissionTests(APITestCase):
+    def setUp(self):
+        """Set up a test user and test data."""
+        self.user = User.objects.create_user(username='testdoctor', password='password123')
+        self.program = Program.objects.create(name="Test Program Permissions")
+        self.client_obj = Client.objects.create(
+            name="Test Client Permissions",
+            date_of_birth=datetime.date(2000, 1, 1)
+        )
+        # URLs needed for testing various endpoints
+        self.program_list_url = reverse('program-list')
+        self.program_detail_url = reverse('program-detail', kwargs={'pk': self.program.pk})
+        self.client_list_url = reverse('client-list')
+        self.client_detail_url = reverse('client-detail', kwargs={'pk': self.client_obj.pk})
+        self.client_search_url = reverse('client-search')
+        self.client_enroll_url = reverse('client-enroll', kwargs={'pk': self.client_obj.pk})
+
+    # --- Test Unauthenticated Access ---
+
+    def test_unauthenticated_program_list_denied(self):
+        """Ensure unauthenticated users cannot list programs."""
+        # NOTE: self.client is unauthenticated by default in a new test class instance
+        response = self.client.get(self.program_list_url)
+        # DRF defaults to 401 for IsAuthenticated without credentials
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_program_create_denied(self):
+        """Ensure unauthenticated users cannot create programs."""
+        data = {'name': 'Forbidden Program'}
+        response = self.client.post(self.program_list_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_client_list_denied(self):
+        """Ensure unauthenticated users cannot list clients."""
+        response = self.client.get(self.client_list_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_client_detail_denied(self):
+        """Ensure unauthenticated users cannot view client details."""
+        response = self.client.get(self.client_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_client_search_denied(self):
+        """Ensure unauthenticated users cannot search clients."""
+        response = self.client.get(self.client_search_url + '?q=test')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_client_enroll_denied(self):
+        """Ensure unauthenticated users cannot enroll clients."""
+        data = {'program_id': self.program.id}
+        response = self.client.post(self.client_enroll_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    # --- Test Authenticated Access ---
+
+    def test_authenticated_program_list_allowed(self):
+        """Ensure authenticated users can list programs."""
+        self.client.force_authenticate(user=self.user) # Authenticate the request
+        response = self.client.get(self.program_list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_authenticated_program_create_allowed(self):
+        """Ensure authenticated users can create programs."""
+        self.client.force_authenticate(user=self.user)
+        data = {'name': 'Allowed Program'}
+        response = self.client.post(self.program_list_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_authenticated_client_list_allowed(self):
+        """Ensure authenticated users can list clients."""
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.client_list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_authenticated_client_detail_allowed(self):
+        """Ensure authenticated users can view client details."""
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.client_detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_authenticated_client_search_allowed(self):
+        """Ensure authenticated users can search clients."""
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.client_search_url + '?q=test')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_authenticated_client_enroll_allowed(self):
+        """Ensure authenticated users can enroll clients."""
+        self.client.force_authenticate(user=self.user)
+        data = {'program_id': self.program.id}
+        response = self.client.post(self.client_enroll_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK) # Enroll returns 200

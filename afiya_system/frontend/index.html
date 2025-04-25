@@ -10,168 +10,150 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        /* Custom styles can go here to override or supplement Bootstrap */
+        /* Custom styles can go here */
         body {
             padding-top: 56px; /* Adjust padding for fixed navbar */
-            background-color: #f8f9fa; /* Light background */
+            background-color: #f8f9fa;
         }
-        .section-card {
-            margin-bottom: 2rem;
-        }
-        /* Make list items clickable, excluding buttons inside */
-        #client-list li span {
-             cursor: pointer;
-        }
-        #client-list li:hover, #program-list li:hover {
-            background-color: #e9ecef;
-        }
-        /* Style for loading spinners */
-        .spinner-border-sm {
-             width: 1rem;
-             height: 1rem;
-             border-width: .2em;
-        }
-        /* Ensure modals are above other content */
+        .section-card { margin-bottom: 2rem; }
+        #client-list li span { cursor: pointer; }
+        #client-list li:hover, #program-list li:hover { background-color: #e9ecef; }
+        .spinner-border-sm { width: 1rem; height: 1rem; border-width: .2em; }
         .modal { z-index: 1050; }
         .modal-backdrop { z-index: 1040; }
-        .hidden { display: none; } /* Utility class */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#"> <i class="bi bi-heart-pulse-fill"></i> Afiya System</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <!-- Add other nav items here if needed -->
-                    <li class="nav-item">
-                        <span class="navbar-text text-white-50">
-                            Welcome, Doctor!
-                        </span>
-                    </li>
-                </ul>
+    <!-- Main app area - should be visible after authentication check -->
+    <div id="main-app-area">
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+           <div class="container-fluid">
+                <a class="navbar-brand" href="#"> <i class="bi bi-heart-pulse-fill"></i> Afiya System</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <span id="welcome-message" class="navbar-text text-white-50 me-3">
+                                Welcome!
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <button class="btn btn-outline-light btn-sm" id="logout-btn">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Main Content Area -->
-    <div class="container mt-4">
-
-        <!-- Global Alert Area -->
-        <div id="global-alert-area" class="mb-3"></div>
-
-        <div class="row">
-            <!-- Programs Column -->
-            <div class="col-lg-6">
-                <div class="card section-card shadow-sm">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <h2 class="h5 mb-0"><i class="bi bi-clipboard2-pulse"></i> Health Programs</h2>
-                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createProgramModal">
-                            <i class="bi bi-plus-circle"></i> New Program
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="program-list-container">
-                            <div class="text-center p-3 loading">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+        <!-- Main Content Area (Programs, Clients, Detail) -->
+        <div class="container mt-4">
+            <div id="global-alert-area" class="mb-3"></div>
+            <div class="row">
+                <!-- Programs Column -->
+                <div class="col-lg-6">
+                   <div class="card section-card shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h2 class="h5 mb-0"><i class="bi bi-clipboard2-pulse"></i> Health Programs</h2>
+                            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createProgramModal">
+                                <i class="bi bi-plus-circle"></i> New Program
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="program-list-container">
+                                <div class="text-center p-3 loading">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <span class="ms-2">Loading programs...</span>
                                 </div>
-                                <span class="ms-2">Loading programs...</span>
+                                <ul id="program-list" class="list-group list-group-flush"></ul>
                             </div>
-                            <ul id="program-list" class="list-group list-group-flush"></ul>
-                            <!-- Program error message handled by global alert -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Clients Column -->
+                <div class="col-lg-6">
+                    <div class="card section-card shadow-sm">
+                         <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h2 class="h5 mb-0"><i class="bi bi-people-fill"></i> Clients</h2>
+                             <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#registerClientModal">
+                                <i class="bi bi-person-plus-fill"></i> Register Client
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <!-- Client Search -->
+                            <form id="search-client-form" class="mb-3">
+                                <div class="input-group">
+                                    <input type="text" id="search-query" name="q" class="form-control form-control-sm" placeholder="Search Clients by Name...">
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit" id="search-submit-btn">
+                                        <i class="bi bi-search"></i> Search
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" id="clear-search-btn">
+                                        <i class="bi bi-x-lg"></i> Clear
+                                    </button>
+                                </div>
+                                 <div id="search-status" class="form-text"></div>
+                            </form>
+
+                            <!-- Client List -->
+                            <div id="client-list-container">
+                                 <div class="text-center p-3 loading">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <span class="ms-2">Loading clients...</span>
+                                </div>
+                                <ul id="client-list" class="list-group list-group-flush"></ul>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Clients Column -->
-            <div class="col-lg-6">
-                <div class="card section-card shadow-sm">
-                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <h2 class="h5 mb-0"><i class="bi bi-people-fill"></i> Clients</h2>
-                         <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#registerClientModal">
-                            <i class="bi bi-person-plus-fill"></i> Register Client
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <!-- Client Search -->
-                        <form id="search-client-form" class="mb-3">
-                            <div class="input-group">
-                                <input type="text" id="search-query" name="q" class="form-control form-control-sm" placeholder="Search Clients by Name...">
-                                <button class="btn btn-outline-secondary btn-sm" type="submit" id="search-submit-btn">
-                                    <i class="bi bi-search"></i> Search
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" type="button" id="clear-search-btn">
-                                    <i class="bi bi-x-lg"></i> Clear
-                                </button>
-                            </div>
-                             <div id="search-status" class="form-text"></div>
-                        </form>
-
-                        <!-- Client List -->
-                        <div id="client-list-container">
-                             <div class="text-center p-3 loading">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <span class="ms-2">Loading clients...</span>
-                            </div>
-                            <ul id="client-list" class="list-group list-group-flush"></ul>
-                             <!-- Client error message handled by global alert -->
+            <!-- Client Detail Section -->
+            <div id="client-detail-section" class="card section-card shadow-sm hidden">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                     <h3 class="h5 mb-0"><i class="bi bi-person-vcard"></i> Client Profile</h3>
+                     <button type="button" class="btn-close btn-close-white" aria-label="Close" id="close-detail-btn"></button>
+                </div>
+                <div class="card-body">
+                     <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> <span id="detail-client-name"></span></p>
+                            <p><strong>Date of Birth:</strong> <span id="detail-client-dob"></span></p>
+                            <p><strong>Contact Info:</strong> <span id="detail-client-contact"></span></p>
+                            <p><strong>Client ID:</strong> <span id="detail-client-id"></span></p>
                         </div>
-                    </div>
+                        <div class="col-md-6">
+                            <h5>Enrolled Programs</h5>
+                            <ul id="enrolled-programs-list" class="list-group mb-3"></ul>
+                            <p id="no-enrolled-programs" class="text-muted hidden">Not enrolled in any programs.</p>
+
+                            <h5>Enroll in New Program</h5>
+                            <form id="enroll-client-form">
+                                 <div class="input-group">
+                                    <select id="program-select" name="program_id" class="form-select" required>
+                                        <option value="">Loading programs...</option>
+                                    </select>
+                                    <button class="btn btn-primary" type="submit" id="enroll-submit-btn">
+                                        <span class="spinner-border spinner-border-sm hidden" role="status" aria-hidden="true"></span>
+                                        Enroll
+                                    </button>
+                                </div>
+                                <div id="enroll-status" class="mt-2"></div>
+                            </form>
+                        </div>
+                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Client Detail Section (Maybe use a Modal or a dedicated area later) -->
-        <div id="client-detail-section" class="card section-card shadow-sm hidden">
-            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                 <h3 class="h5 mb-0"><i class="bi bi-person-vcard"></i> Client Profile</h3>
-                 <button type="button" class="btn-close btn-close-white" aria-label="Close" id="close-detail-btn"></button>
-            </div>
-            <div class="card-body">
-                 <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Name:</strong> <span id="detail-client-name"></span></p>
-                        <p><strong>Date of Birth:</strong> <span id="detail-client-dob"></span></p>
-                        <p><strong>Contact Info:</strong> <span id="detail-client-contact"></span></p>
-                        <p><strong>Client ID:</strong> <span id="detail-client-id"></span></p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>Enrolled Programs</h5>
-                        <ul id="enrolled-programs-list" class="list-group mb-3">
-                            <!-- Enrolled programs will be listed here -->
-                        </ul>
-                        <p id="no-enrolled-programs" class="text-muted hidden">Not enrolled in any programs.</p>
-
-                        <h5>Enroll in New Program</h5>
-                        <form id="enroll-client-form">
-                             <div class="input-group">
-                                <select id="program-select" name="program_id" class="form-select" required>
-                                    <option value="">Loading programs...</option>
-                                    <!-- Program options will be populated here -->
-                                </select>
-                                <button class="btn btn-primary" type="submit" id="enroll-submit-btn">
-                                    <span class="spinner-border spinner-border-sm hidden" role="status" aria-hidden="true"></span>
-                                    Enroll
-                                </button>
-                            </div>
-                            <div id="enroll-status" class="mt-2"></div> <!-- Status message area -->
-                        </form>
-                    </div>
-                 </div>
-            </div>
-        </div>
-
-    </div> <!-- /container -->
-
+    </div> <!-- End of main-app-area -->
 
     <!-- Create Program Modal -->
     <div class="modal fade" id="createProgramModal" tabindex="-1" aria-labelledby="createProgramModalLabel" aria-hidden="true">
@@ -187,7 +169,7 @@
                             <label for="program-name-modal" class="form-label">Program Name:</label>
                             <input type="text" class="form-control" id="program-name-modal" name="name" required>
                         </div>
-                         <div id="create-program-status" class="mt-2"></div> <!-- Status message area -->
+                         <div id="create-program-status" class="mt-2"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -223,7 +205,7 @@
                             <label for="client-contact-modal" class="form-label">Contact Info (Phone/Email):</label>
                             <input type="text" class="form-control" id="client-contact-modal" name="contact_info">
                         </div>
-                         <div id="register-client-status" class="mt-2"></div> <!-- Status message area -->
+                         <div id="register-client-status" class="mt-2"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -237,26 +219,64 @@
         </div>
     </div>
 
+    <!-- Edit Client Modal -->
+    <div class="modal fade" id="editClientModal" tabindex="-1" aria-labelledby="editClientModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                 <form id="edit-client-form">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="editClientModalLabel">Edit Client</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-client-id" name="id">
+                        <div class="mb-3">
+                            <label for="edit-client-name-modal" class="form-label">Full Name:</label>
+                            <input type="text" class="form-control" id="edit-client-name-modal" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-client-dob-modal" class="form-label">Date of Birth:</label>
+                            <input type="date" class="form-control" id="edit-client-dob-modal" name="date_of_birth" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-client-contact-modal" class="form-label">Contact Info (Phone/Email):</label>
+                            <input type="text" class="form-control" id="edit-client-contact-modal" name="contact_info">
+                        </div>
+                         <div id="edit-client-status" class="mt-2"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="edit-client-submit-btn">
+                            <span class="spinner-border spinner-border-sm hidden" role="status" aria-hidden="true"></span>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
-        const API_BASE_URL = 'http://127.0.0.1:8000'; // Your Django backend URL
+        const API_BASE_URL = 'http://127.0.0.1:8000';
 
-        // --- DOM Element References ---
-        // Global Alert
+        // --- DOM References ---
+        const mainAppArea = document.getElementById('main-app-area');
+        const logoutBtn = document.getElementById('logout-btn');
+        const welcomeMessage = document.getElementById('welcome-message');
         const globalAlertArea = document.getElementById('global-alert-area');
         // Programs
         const programListEl = document.getElementById('program-list');
         const programLoadingIndicator = document.querySelector('#program-list-container .loading');
         const createProgramForm = document.getElementById('create-program-form');
-        const programNameInputModal = document.getElementById('program-name-modal'); // Updated ID
+        const programNameInputModal = document.getElementById('program-name-modal');
         const createProgramStatus = document.getElementById('create-program-status');
         const createProgramSubmitBtn = document.getElementById('create-program-submit-btn');
         const createProgramModalEl = document.getElementById('createProgramModal');
-        const createProgramModal = bootstrap.Modal.getOrCreateInstance(createProgramModalEl); // Bootstrap Modal instance
-
+        const createProgramModal = bootstrap.Modal.getOrCreateInstance(createProgramModalEl);
         // Clients - General
         const clientListEl = document.getElementById('client-list');
         const clientLoadingIndicator = document.querySelector('#client-list-container .loading');
@@ -268,14 +288,23 @@
         const searchSubmitBtn = document.getElementById('search-submit-btn');
         // Clients - Register
         const registerClientForm = document.getElementById('register-client-form');
-        const clientNameInputModal = document.getElementById('client-name-modal'); // Updated ID
-        const clientDobInputModal = document.getElementById('client-dob-modal');   // Updated ID
-        const clientContactInputModal = document.getElementById('client-contact-modal'); // Updated ID
+        const clientNameInputModal = document.getElementById('client-name-modal');
+        const clientDobInputModal = document.getElementById('client-dob-modal');
+        const clientContactInputModal = document.getElementById('client-contact-modal');
         const registerClientStatus = document.getElementById('register-client-status');
         const registerClientSubmitBtn = document.getElementById('register-client-submit-btn');
         const registerClientModalEl = document.getElementById('registerClientModal');
-        const registerClientModal = bootstrap.Modal.getOrCreateInstance(registerClientModalEl); // Bootstrap Modal instance
-
+        const registerClientModal = bootstrap.Modal.getOrCreateInstance(registerClientModalEl);
+        // Clients - Edit
+        const editClientModalEl = document.getElementById('editClientModal');
+        const editClientModal = bootstrap.Modal.getOrCreateInstance(editClientModalEl);
+        const editClientForm = document.getElementById('edit-client-form');
+        const editClientIdInput = document.getElementById('edit-client-id');
+        const editClientNameInputModal = document.getElementById('edit-client-name-modal');
+        const editClientDobInputModal = document.getElementById('edit-client-dob-modal');
+        const editClientContactInputModal = document.getElementById('edit-client-contact-modal');
+        const editClientStatus = document.getElementById('edit-client-status');
+        const editClientSubmitBtn = document.getElementById('edit-client-submit-btn');
         // Clients - Detail/Enroll
         const clientDetailSection = document.getElementById('client-detail-section');
         const detailClientName = document.getElementById('detail-client-name');
@@ -290,13 +319,27 @@
         const enrollSubmitBtn = document.getElementById('enroll-submit-btn');
         const closeDetailBtn = document.getElementById('close-detail-btn');
 
-        let currentClientId = null; // Store the ID of the client being viewed/enrolled
+        let currentClientId = null;
 
         // --- Utility Functions ---
         function showLoadingIndicator(element) { element?.classList.remove('hidden'); }
         function hideLoadingIndicator(element) { element?.classList.add('hidden'); }
 
-        // Function to show Bootstrap alerts
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         function showAlert(message, type = 'danger', area = globalAlertArea, dismissible = true) {
             const wrapper = document.createElement('div');
             wrapper.innerHTML = `
@@ -305,24 +348,17 @@
                     ${dismissible ? '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' : ''}
                 </div>
             `;
-            // Clear previous alerts in the specific area before showing a new one
-            if (area === globalAlertArea) { // Only clear global area automatically
-                 area.innerHTML = '';
-            }
+            if (area === globalAlertArea) { area.innerHTML = ''; }
             area.append(wrapper);
         }
 
-        // Function to show status within forms (modals or detail section)
         function showFormStatus(element, message, isSuccess = true) {
              if (!element) return;
              element.textContent = message;
-             // Use text-success or text-danger for color, ensure hidden is removed
              element.className = `mt-2 ${isSuccess ? 'text-success' : 'text-danger'}`;
-             // Optionally hide after a delay
              setTimeout(() => element.classList.add('hidden'), 5000);
          }
 
-        // Function to manage button loading state
         function setButtonLoading(button, isLoading) {
             if (!button) return;
             const spinner = button.querySelector('.spinner-border');
@@ -335,47 +371,58 @@
             }
         }
 
-        // --- API Call Function (remains largely the same) ---
+        // --- API Call Function ---
         async function apiRequest(url, options = {}) {
             const headers = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
                 ...options.headers,
             };
             try {
-                const response = await fetch(url, { ...options, headers });
+                const response = await fetch(url, {
+                    ...options,
+                    headers,
+                    credentials: 'include' // IMPORTANT
+                });
+                if (response.status === 204) { return null; }
                 const data = await response.json().catch(() => null);
+
                 if (!response.ok) {
                     let errorMessage = `HTTP error! Status: ${response.status}`;
                     if (data) {
-                        if (data.detail) {
-                            errorMessage = data.detail;
-                        } else if (typeof data === 'object') {
+                        if (data.detail) { errorMessage = data.detail; }
+                        else if (data.non_field_errors) { errorMessage = data.non_field_errors.join(', '); }
+                        else if (typeof data === 'object') {
                             errorMessage = Object.entries(data)
                                 .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
                                 .join('; ');
                         }
                     }
                     console.error("API Error Data:", data);
+                    if (response.status === 401 || response.status === 403) {
+                         errorMessage = `Authentication required or session expired. Redirecting to login... (${errorMessage})`;
+                         console.error(errorMessage);
+                         window.location.href = 'login.html'; // Redirect
+                         throw new Error(errorMessage);
+                    }
                     throw new Error(errorMessage);
                 }
                 return data;
             } catch (error) {
                 console.error('API Request Error:', error);
-                // Display error in the global alert area
-                showAlert(`API Request Failed: ${error.message || 'Unknown error'}`);
-                throw error; // Re-throw to stop further processing in calling function
+                if (!(error.message.includes('Authentication required') || error.message.includes('session expired'))) {
+                    showAlert(`API Request Failed: ${error.message || 'Unknown error'}`);
+                }
+                throw error;
             }
         }
-
 
         // --- Program Functions ---
         async function fetchPrograms(populateSelect = false) {
             showLoadingIndicator(programLoadingIndicator);
             programListEl.innerHTML = '';
-            if (populateSelect) {
-                 programSelect.innerHTML = '<option value="">Loading programs...</option>';
-            }
+            if (populateSelect) { programSelect.innerHTML = '<option value="">Loading programs...</option>'; }
 
             try {
                 const programs = await apiRequest(`${API_BASE_URL}/afiya/programs/`);
@@ -383,13 +430,12 @@
 
                 if (programs.length === 0) {
                     programListEl.innerHTML = '<li class="list-group-item text-muted">No programs found.</li>';
-                     if (populateSelect) programSelect.innerHTML = '<option value="">No programs available</option>';
+                    if (populateSelect) programSelect.innerHTML = '<option value="">No programs available</option>';
                 } else {
                     programs.forEach(program => {
                         const listItem = document.createElement('li');
-                        listItem.className = 'list-group-item list-group-item-action'; // Bootstrap classes
-                        listItem.textContent = program.name; // Simpler display
-                        // Add data attribute if needed for future actions (e.g., edit/delete)
+                        listItem.className = 'list-group-item list-group-item-action';
+                        listItem.textContent = program.name;
                         listItem.dataset.programId = program.id;
                         programListEl.appendChild(listItem);
 
@@ -400,28 +446,21 @@
                              programSelect.appendChild(option);
                         }
                     });
-                     if (populateSelect && programSelect.options.length > 0 && programSelect.options[0]?.value === "") {
-                         programSelect.remove(0); // Remove "Loading..." if programs were added
-                     } else if (populateSelect && programs.length > 0) {
-                         // Ensure a default prompt if needed after loading
-                         // const defaultOption = document.createElement('option');
-                         // defaultOption.value = "";
-                         // defaultOption.textContent = "Select a program";
-                         // programSelect.insertBefore(defaultOption, programSelect.firstChild);
-                     }
+                    if (populateSelect && programSelect.options.length > 0 && programSelect.options[0]?.value === "") {
+                         programSelect.remove(0);
+                    }
                 }
             } catch (error) {
                 hideLoadingIndicator(programLoadingIndicator);
-                // Error already shown by apiRequest
                 programListEl.innerHTML = '<li class="list-group-item text-danger">Error loading programs.</li>';
-                 if (populateSelect) programSelect.innerHTML = '<option value="">Error loading programs</option>';
+                if (populateSelect) programSelect.innerHTML = '<option value="">Error loading programs</option>';
             }
         }
 
         async function createProgram(event) {
             event.preventDefault();
             setButtonLoading(createProgramSubmitBtn, true);
-            createProgramStatus.textContent = ''; // Clear previous status
+            createProgramStatus.textContent = '';
 
             const programName = programNameInputModal.value.trim();
             if (!programName) {
@@ -436,11 +475,10 @@
                     body: JSON.stringify({ name: programName })
                 });
                 showAlert(`Program "${result.name}" created successfully!`, 'success');
-                createProgramForm.reset(); // Reset form inside modal
-                createProgramModal.hide(); // Hide modal on success
-                fetchPrograms(true); // Refresh list and enrollment dropdown
+                createProgramForm.reset();
+                createProgramModal.hide();
+                fetchPrograms(true);
             } catch (error) {
-                // Show error within the modal form status area
                  showFormStatus(createProgramStatus, `Error: ${error.message}`, false);
             } finally {
                  setButtonLoading(createProgramSubmitBtn, false);
@@ -451,7 +489,7 @@
         async function fetchClients(url = `${API_BASE_URL}/afiya/clients/`) {
             showLoadingIndicator(clientLoadingIndicator);
             clientListEl.innerHTML = '';
-            hideClientDetail(); // Hide detail view when fetching list
+            hideClientDetail();
 
             try {
                 const clients = await apiRequest(url);
@@ -462,50 +500,33 @@
                 } else {
                     clients.forEach(client => {
                         const listItem = document.createElement('li');
-                        // Use flexbox to align name and buttons
                         listItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
                         listItem.dataset.clientId = client.id;
 
-                        // Client Name Span
                         const nameSpan = document.createElement('span');
                         nameSpan.textContent = client.name;
-                        // Add click listener to the name span
-                        nameSpan.style.cursor = 'pointer'; // Indicate clickable area
+                        nameSpan.style.cursor = 'pointer';
                         nameSpan.addEventListener('click', () => showClientDetail(client.id));
                         listItem.appendChild(nameSpan);
 
-
-                        // --- Button Group ---
                         const buttonGroup = document.createElement('div');
-                        buttonGroup.className = 'd-flex gap-1'; // Add gap between buttons
+                        buttonGroup.className = 'd-flex gap-1';
 
-                        // View Button
                         const viewButton = document.createElement('button');
                         viewButton.className = 'btn btn-sm btn-outline-primary';
-                        viewButton.innerHTML = '<i class="bi bi-eye"></i>'; // Eye icon
-                        viewButton.title = 'View Client Profile'; // Tooltip
-                        viewButton.onclick = (e) => {
-                            e.stopPropagation(); // Prevent li click event
-                            showClientDetail(client.id);
-                        };
+                        viewButton.innerHTML = '<i class="bi bi-eye"></i>';
+                        viewButton.title = 'View Client Profile';
+                        viewButton.onclick = (e) => { e.stopPropagation(); showClientDetail(client.id); };
                         buttonGroup.appendChild(viewButton);
 
-                        // Edit Button (Placeholder)
                         const editButton = document.createElement('button');
-                        editButton.className = 'btn btn-sm btn-outline-secondary'; // Or btn-warning
-                        editButton.innerHTML = '<i class="bi bi-pencil-square"></i>'; // Pencil icon
-                        editButton.title = 'Edit Client (Not Implemented)'; // Tooltip
-                        editButton.disabled = true; // Disable until implemented
-                        editButton.onclick = (e) => {
-                             e.stopPropagation(); // Prevent li click event
-                             console.log(`Edit client ${client.id} - function not implemented yet.`);
-                             // Implement editClient(client.id) function later
-                             // This would likely open a modal similar to register, pre-filled with data
-                        };
+                        editButton.className = 'btn btn-sm btn-outline-warning';
+                        editButton.innerHTML = '<i class="bi bi-pencil-square"></i>';
+                        editButton.title = 'Edit Client';
+                        editButton.onclick = (e) => { e.stopPropagation(); openEditClientModal(client.id); };
                         buttonGroup.appendChild(editButton);
-                        // --- End Button Group ---
 
-                        listItem.appendChild(buttonGroup); // Add the group to the list item
+                        listItem.appendChild(buttonGroup);
                         clientListEl.appendChild(listItem);
                     });
                 }
@@ -515,6 +536,63 @@
             }
         }
 
+        async function openEditClientModal(clientId) {
+            editClientForm.reset();
+            editClientStatus.textContent = '';
+            editClientStatus.className = 'mt-2 hidden';
+            editClientIdInput.value = '';
+
+            try {
+                const client = await apiRequest(`${API_BASE_URL}/afiya/clients/${clientId}/`);
+                editClientIdInput.value = client.id;
+                editClientNameInputModal.value = client.name;
+                editClientDobInputModal.value = client.date_of_birth;
+                editClientContactInputModal.value = client.contact_info || '';
+                editClientModal.show();
+            } catch (error) {
+                showAlert(`Failed to load client data for editing: ${error.message}`);
+            }
+        }
+
+        async function editClient(event) {
+            event.preventDefault();
+            setButtonLoading(editClientSubmitBtn, true);
+            editClientStatus.textContent = '';
+
+            const clientId = editClientIdInput.value;
+            if (!clientId) {
+                showFormStatus(editClientStatus, 'Client ID is missing. Cannot update.', false);
+                setButtonLoading(editClientSubmitBtn, false);
+                return;
+            }
+
+            const clientData = {
+                name: editClientNameInputModal.value.trim(),
+                date_of_birth: editClientDobInputModal.value,
+                contact_info: editClientContactInputModal.value.trim()
+            };
+
+            if (!clientData.name || !clientData.date_of_birth) {
+                showFormStatus(editClientStatus, 'Name and Date of Birth are required.', false);
+                setButtonLoading(editClientSubmitBtn, false);
+                return;
+            }
+
+            try {
+                const result = await apiRequest(`${API_BASE_URL}/afiya/clients/${clientId}/`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(clientData)
+                });
+                showAlert(`Client "${result.name}" updated successfully!`, 'success');
+                editClientModal.hide();
+                fetchClients();
+                if (currentClientId == clientId) { showClientDetail(clientId); }
+            } catch (error) {
+                 showFormStatus(editClientStatus, `Error updating client: ${error.message}`, false);
+            } finally {
+                 setButtonLoading(editClientSubmitBtn, false);
+            }
+        }
 
         async function searchClients(event) {
             event.preventDefault();
@@ -523,14 +601,14 @@
             searchStatus.textContent = 'Searching...';
 
             if (!query) {
-                 fetchClients(); // Fetch all clients if query is empty
+                 fetchClients();
                  searchStatus.textContent = 'Showing all clients.';
                  setButtonLoading(searchSubmitBtn, false);
                  return;
             }
 
             const searchUrl = `${API_BASE_URL}/afiya/clients/search/?q=${encodeURIComponent(query)}`;
-            await fetchClients(searchUrl); // Fetch using the search URL
+            await fetchClients(searchUrl);
             searchStatus.textContent = `Showing results for "${query}"`;
             setButtonLoading(searchSubmitBtn, false);
         }
@@ -538,15 +616,13 @@
         function clearSearch() {
             searchQueryInput.value = '';
             searchStatus.textContent = '';
-            fetchClients(); // Fetch all clients
+            fetchClients();
         }
-
-        // Register Client Modal is shown via data-bs-toggle attribute
 
         async function registerClient(event) {
             event.preventDefault();
             setButtonLoading(registerClientSubmitBtn, true);
-            registerClientStatus.textContent = ''; // Clear previous status
+            registerClientStatus.textContent = '';
 
             const clientData = {
                 name: clientNameInputModal.value.trim(),
@@ -568,7 +644,7 @@
                 showAlert(`Client "${result.name}" registered successfully!`, 'success');
                 registerClientForm.reset();
                 registerClientModal.hide();
-                fetchClients(); // Refresh the client list
+                fetchClients();
             } catch (error) {
                  showFormStatus(registerClientStatus, `Error: ${error.message}`, false);
             } finally {
@@ -578,51 +654,48 @@
 
         async function showClientDetail(clientId) {
             clientDetailSection.classList.remove('hidden');
-            // Scroll to the detail section for better visibility
             clientDetailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-            // Reset fields and show loading state
             detailClientName.textContent = 'Loading...';
             detailClientDob.textContent = '...';
             detailClientContact.textContent = '...';
             detailClientId.textContent = '...';
             enrolledProgramsList.innerHTML = '<li class="list-group-item text-muted">Loading...</li>';
             noEnrolledProgramsMsg.classList.add('hidden');
-            enrollStatus.textContent = ''; // Clear previous enroll status
+            enrollStatus.textContent = '';
             currentClientId = clientId;
 
             try {
-                // Fetch client data and programs for dropdown concurrently
                 const [client, _] = await Promise.all([
                     apiRequest(`${API_BASE_URL}/afiya/clients/${clientId}/`),
-                    fetchPrograms(true) // Fetch programs and populate select
+                    fetchPrograms(true)
                 ]);
 
-                // Populate client details
                 detailClientName.textContent = client.name;
                 detailClientDob.textContent = client.date_of_birth;
                 detailClientContact.textContent = client.contact_info || 'N/A';
                 detailClientId.textContent = client.id;
 
-                // Populate enrolled programs
-                enrolledProgramsList.innerHTML = ''; // Clear loading state
+                enrolledProgramsList.innerHTML = '';
                 if (client.enrolled_programs && client.enrolled_programs.length > 0) {
                     client.enrolled_programs.forEach(program => {
                         const listItem = document.createElement('li');
-                        listItem.className = 'list-group-item'; // Simple list item
+                        listItem.className = 'list-group-item';
                         listItem.textContent = `${program.name}`;
                         enrolledProgramsList.appendChild(listItem);
                     });
                     noEnrolledProgramsMsg.classList.add('hidden');
                 } else {
                     noEnrolledProgramsMsg.classList.remove('hidden');
-                    enrolledProgramsList.innerHTML = ''; // Ensure list is empty if no programs
+                    enrolledProgramsList.innerHTML = '';
                 }
 
             } catch (error) {
                  detailClientName.textContent = 'Error';
-                 // Error already shown by apiRequest or fetchPrograms
-                 hideClientDetail(); // Hide section on error
+                 // Error might cause redirect via apiRequest, otherwise hide detail
+                 if (!(error.message.includes('Authentication required') || error.message.includes('session expired'))) {
+                    hideClientDetail();
+                 }
             }
         }
 
@@ -636,7 +709,7 @@
             if (!currentClientId) return;
 
             setButtonLoading(enrollSubmitBtn, true);
-            enrollStatus.textContent = ''; // Clear previous status
+            enrollStatus.textContent = '';
 
             const programId = programSelect.value;
             if (!programId) {
@@ -650,9 +723,7 @@
                     method: 'POST',
                     body: JSON.stringify({ program_id: parseInt(programId) })
                 });
-                // Use a more specific success message within the detail section
                 showFormStatus(enrollStatus, `Successfully enrolled in ${result.enrolled_programs.find(p => p.id == programId)?.name || 'program'}!`, true);
-                // Refresh only the enrolled programs list part of the detail view
                 await updateEnrolledProgramsList(currentClientId);
 
             } catch (error) {
@@ -662,11 +733,10 @@
             }
         }
 
-        // Helper to refresh just the enrolled programs list after enrollment
         async function updateEnrolledProgramsList(clientId) {
              try {
                  const client = await apiRequest(`${API_BASE_URL}/afiya/clients/${clientId}/`);
-                 enrolledProgramsList.innerHTML = ''; // Clear existing list
+                 enrolledProgramsList.innerHTML = '';
                  if (client.enrolled_programs && client.enrolled_programs.length > 0) {
                      client.enrolled_programs.forEach(program => {
                          const listItem = document.createElement('li');
@@ -677,7 +747,7 @@
                      noEnrolledProgramsMsg.classList.add('hidden');
                  } else {
                      noEnrolledProgramsMsg.classList.remove('hidden');
-                     enrolledProgramsList.innerHTML = ''; // Ensure list is empty if no programs
+                     enrolledProgramsList.innerHTML = '';
                  }
              } catch (error) {
                  console.error("Failed to update enrolled programs list:", error);
@@ -685,33 +755,67 @@
              }
          }
 
+        // --- Logout Function ---
+        async function handleLogout() {
+            logoutBtn.disabled = true;
+            logoutBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging out...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api-auth/logout/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) { console.error(`Logout request failed with status: ${response.status}`); }
+                window.location.href = 'login.html'; // Redirect to login
+
+            } catch (error) {
+                console.error('Logout Error:', error);
+                showAlert(`Logout failed: ${error.message}. Redirecting to login.`);
+                window.location.href = 'login.html'; // Still redirect
+            }
+        }
+
+        // --- Authentication Check Function ---
+        async function checkAuthentication() {
+             console.log("Checking authentication...");
+             try {
+                 // Attempt to fetch programs. If this fails with 401/403, apiRequest will redirect.
+                 await apiRequest(`${API_BASE_URL}/afiya/programs/`);
+                 console.log("Authentication successful. Loading app data.");
+                 // Set welcome message (could fetch actual username later)
+                 welcomeMessage.textContent = `Welcome, Doctor!`; // Placeholder
+                 // Load initial data
+                 fetchPrograms(true);
+                 fetchClients();
+             } catch (error) {
+                 // Error handling (including redirect) is done within apiRequest
+                 console.error("Initial authentication check failed:", error.message);
+             }
+         }
 
         // --- Initial Load and Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
-            fetchPrograms(true); // Fetch programs for list and dropdown on initial load
-            fetchClients();   // Fetch clients on initial load
+            // Add Logout Listener
+            logoutBtn.addEventListener('click', handleLogout);
 
-            // Program Listeners
+            // Keep other listeners
             createProgramForm.addEventListener('submit', createProgram);
-
-            // Client Listeners
             searchClientForm.addEventListener('submit', searchClients);
             clearSearchBtn.addEventListener('click', clearSearch);
-            // Register Client Modal is triggered by button with data-bs-toggle
             registerClientForm.addEventListener('submit', registerClient);
             closeDetailBtn.addEventListener('click', hideClientDetail);
             enrollClientForm.addEventListener('submit', enrollClient);
+            editClientForm.addEventListener('submit', editClient);
 
-            // Optional: Clear modal status when modal is hidden
-            createProgramModalEl.addEventListener('hidden.bs.modal', () => {
-                createProgramStatus.textContent = '';
-                createProgramForm.reset();
-            });
-            registerClientModalEl.addEventListener('hidden.bs.modal', () => {
-                registerClientStatus.textContent = '';
-                registerClientForm.reset();
-            });
+            // Keep Modal Listeners
+            createProgramModalEl.addEventListener('hidden.bs.modal', () => { createProgramStatus.textContent = ''; createProgramForm.reset(); });
+            registerClientModalEl.addEventListener('hidden.bs.modal', () => { registerClientStatus.textContent = ''; registerClientForm.reset(); });
+            editClientModalEl.addEventListener('hidden.bs.modal', () => { editClientStatus.textContent = ''; editClientForm.reset(); });
 
+            // --- Initial Action: Check Authentication ---
+            checkAuthentication();
         });
 
     </script>

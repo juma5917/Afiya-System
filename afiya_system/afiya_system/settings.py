@@ -20,11 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-x0han4inmd=74p+ccx2u0=$%_x9879*ewfq@x^!!0*6=0^z69-'
+SECRET_KEY = 'django-insecure-x0han4inmd=74p+ccx2u0=$%_x9879*ewfq@x^!!0*6=0^z69-' # NOTE: Replace with environment variable in production
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True # NOTE: Set to False in production
 
+# NOTE: Configure appropriately for production deployment
 ALLOWED_HOSTS = []
 
 
@@ -37,42 +38,49 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'afiya.apps.AfiyaConfig',
-    'rest_framework',  # Django REST Framework
-    'corsheaders',  # For handling CORS
-    'django_filters',  # For filtering in DRF
-    'rest_framework.authtoken',  # For token authentication
 
+    # Third-party apps
+    'rest_framework',           # Django REST Framework
+    'corsheaders',              # For handling CORS
+    'django_filters',           # For filtering in DRF (if used, otherwise optional)
+    'rest_framework.authtoken', # For token authentication
+
+    # Your apps
+    'afiya.apps.AfiyaConfig',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware', # Handles session auth
+    'corsheaders.middleware.CorsMiddleware', # Should be high up
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware', # Handles user auth
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS Configuration - adjust origins as needed for your frontend deployment
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080", # Example: If your frontend runs on port 8080
+    "http://localhost:8080", # Example: Common port for Vue/React dev servers
     "http://127.0.0.1:8080",
     "http://localhost:5500", # Example: Common port for VS Code Live Server
     "http://127.0.0.1:5500",
-    "null", # Allow requests from file:// URLs (for simple local HTML files) - USE WITH CAUTION IN PRODUCTION
+    "null", # Allow requests from file:// URLs (for simple local HTML files) - USE WITH CAUTION
 ]
+# Alternatively, for development only (less secure):
+# CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'afiya_system.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [], # Add frontend build directory here if serving static frontend build
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -86,7 +94,7 @@ WSGI_APPLICATION = 'afiya_system.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# NOTE: Use PostgreSQL or other robust DB for production
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -119,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'UTC' # Consider setting to your local timezone if appropriate
 
 USE_I18N = True
 
@@ -130,8 +138,28 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+# Add STATIC_ROOT for production deployment with 'collectstatic'
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django REST Framework Settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # Useful for browser-based interaction (login/logout) and the browsable API
+        'rest_framework.authentication.SessionAuthentication',
+        # Useful if you plan to use API tokens for external clients or mobile apps
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        # By default, allow any access unless overridden in a specific view.
+        # Your views override this with IsAuthenticated.
+        'rest_framework.permissions.AllowAny',
+    ],
+    # Optional: Add default pagination, filtering, etc. here if desired
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 'PAGE_SIZE': 10
+}

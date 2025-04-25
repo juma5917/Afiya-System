@@ -1,75 +1,106 @@
-from rest_framework import generics, status, views # Use generics for standard CRUD
-from rest_framework.decorators import action # For custom actions like search/enroll
-from rest_framework.response import Response
-from rest_framework import viewsets # ViewSets group related views
+# /home/juma-samwel-onyango/Software Engineering Intern Task/afiya_system/afiya/views.py
 
+from rest_framework import viewsets, status, serializers
+from rest_framework.decorators import action
+from rest_framework.response import Response
+# Import permissions
+from rest_framework import permissions
 from .models import Program, Client
 from .serializers import ProgramSerializer, ClientSerializer, ClientEnrollmentSerializer
 
 class ProgramViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows programs to be viewed or edited.
-    Provides list, create, retrieve, update, destroy actions.
+    Requires authentication.
+    Provides list, create, retrieve, update, partial_update, destroy actions.
     """
     queryset = Program.objects.all().order_by('name')
     serializer_class = ProgramSerializer
-    # Add permissions later if needed: permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    # Require authentication for all program actions
+    permission_classes = [permissions.IsAuthenticated]
+
 
 class ClientViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows clients to be viewed or edited.
+    API endpoint that allows clients to be viewed, edited, searched, and enrolled.
+    Requires authentication.
+    Provides list, create, retrieve, update, partial_update, destroy actions,
+    plus custom 'search' and 'enroll' actions.
     """
-    queryset = Client.objects.all().order_by('name')
+    # Optimize query by prefetching related programs to avoid N+1 queries
+    # when serializing the list or detail views.
+    queryset = Client.objects.prefetch_related('enrolled_programs').all().order_by('name')
     serializer_class = ClientSerializer
+    # Require authentication for all client actions
+    permission_classes = [permissions.IsAuthenticated]
 
-    # Custom action for searching clients (Requirement 4)
-    # Maps to GET /api/clients/search/?q=...
     @action(detail=False, methods=['get'], url_path='search')
     def search(self, request):
+        """
+        Search for clients by name (case-insensitive).
+        Requires 'q' query parameter. If 'q' is empty, returns all clients.
+        Maps to GET /afiya/clients/search/?q=...
+        """
         query = request.query_params.get('q', None)
-        if query is not None:
-            # Simple case-insensitive name search
-            clients = self.get_queryset().filter(name__icontains=query)
-            serializer = self.get_serializer(clients, many=True)
-            return Response(serializer.data)
-        else:
-            return Response({"detail": "Query parameter 'q' is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if query is None:
+             # Return 400 Bad Request if 'q' parameter is missing entirely
+             return Response(
+                 {"detail": "Query parameter 'q' is required."},
+                 status=status.HTTP_400_BAD_REQUEST
+             )
 
-    # Custom action for enrolling a client (Requirement 3 & 5)
-    # Maps to POST /api/clients/{client_pk}/enroll/
+        # Handle empty query string - return all clients in this case
+        if not query:
+             clients = self.get_queryset() # Use the ViewSet's default queryset
+        else:
+            # Perform case-insensitive search on the name field
+            clients = self.get_queryset().filter(name__icontains=query)
+
+        # Use the ViewSet's default serializer (ClientSerializer)
+        serializer = self.get_serializer(clients, many=True)
+        return Response(serializer.data)
+
+    # Use ClientEnrollmentSerializer specifically for INPUT validation here
     @action(detail=True, methods=['post'], serializer_class=ClientEnrollmentSerializer)
     def enroll(self, request, pk=None):
-        client = self.get_object()
+        """
+        Enroll a specific client (by pk in URL) into a program
+        (by program_id in request body).
+        Maps to POST /afiya/clients/{client_pk}/enroll/
+        """
+        client = self.get_object() # Gets client based on pk in URL, handles 404 if not found
         # Validate the incoming request using ClientEnrollmentSerializer
         enrollment_serializer = self.get_serializer(data=request.data)
 
-        if enrollment_serializer.is_valid():
-            program_id = enrollment_serializer.validated_data['program_id']
-            try:
-                program = Program.objects.get(pk=program_id)
-                client.enrolled_programs.add(program)
-                # No need to call client.save() for ManyToManyField.add unless signals depend on it
+        # Use raise_exception=True for standard DRF error handling.
+        # If validation fails, it automatically returns a 400 Bad Request response.
+        enrollment_serializer.is_valid(raise_exception=True)
 
-                # --- FIX IS HERE ---
-                # Use the main ClientSerializer for the RESPONSE
-                response_serializer = ClientSerializer(client)
-                return Response(response_serializer.data, status=status.HTTP_200_OK)
-                # --- END FIX ---
+        # If validation passes, validated_data is available
+        program_id = enrollment_serializer.validated_data['program_id']
+        try:
+            # Fetch the program instance
+            program = Program.objects.get(pk=program_id)
+            # Add the client to the program's 'clients' relationship (or vice-versa)
+            client.enrolled_programs.add(program)
+            # Note: .add() handles duplicates gracefully (doesn't add if already present)
 
-            except Program.DoesNotExist:
-                # Use the validation error format DRF expects for consistency
-                raise serializers.ValidationError(
-                    {'program_id': f"Program with ID {program_id} not found."}
-                )
-                # Or keep your original response format if preferred:
-                # return Response(
-                #     {'error': f"Program with ID {program_id} not found."},
-                #     status=status.HTTP_400_BAD_REQUEST
-                # )
-        else:
-            # Return validation errors from the enrollment_serializer
-            return Response(enrollment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Return the updated client profile using the default ClientSerializer
+            # This ensures the response includes the newly enrolled program.
+            response_serializer = ClientSerializer(client)
+            return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+        except Program.DoesNotExist:
+            # This case should ideally be caught by the ClientEnrollmentSerializer's validation,
+            # but adding it here provides an extra layer of safety, especially if
+            # the program is deleted between validation and this point (race condition).
+            # Re-raise as a validation error for consistent API responses.
+            raise serializers.ValidationError(
+                {'program_id': f"Program with ID {program_id} not found."}
+            )
+
     # Requirement 5 (View Profile) is handled by the default 'retrieve' action
-    # GET /api/clients/{client_pk}/
+    # provided by ModelViewSet: GET /afiya/clients/{client_pk}/
 
     # Requirement 6 (Expose Profile via API) is inherently done by this ViewSet
+    # and its associated serializers and URL routing.
