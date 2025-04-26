@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os # Import os module for path joining
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles', # <--- Essential for static files
 
     # Third-party apps
     'rest_framework',           # Django REST Framework
@@ -71,10 +72,14 @@ CORS_ALLOWED_ORIGINS = [
 # Alternatively, for development only (less secure):
 # CORS_ALLOW_ALL_ORIGINS = True
 
+# Allow credentials (like cookies for session auth) to be sent from these origins
+CORS_ALLOW_CREDENTIALS = True # <--- Add this if using SessionAuthentication
+
 # Trust your frontend origin for CSRF purposes when credentials are involved
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
+    # Add other frontend origins if needed
 ]
 
 ROOT_URLCONF = 'afiya_system.urls'
@@ -82,7 +87,8 @@ ROOT_URLCONF = 'afiya_system.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'frontend'], # Add frontend build directory here if serving static frontend build
+        # Tell Django where to find your HTML templates (like index.html, login.html)
+        'DIRS': [os.path.join(BASE_DIR, 'frontend')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -143,7 +149,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/' # The URL prefix for static files
+
+# Directories where Django will look for static files (outside of app static/ dirs)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend'), # <--- Add this line!
+]
+
 # Add STATIC_ROOT for production deployment with 'collectstatic'
 # STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -165,7 +177,12 @@ REST_FRAMEWORK = {
         # Your views override this with IsAuthenticated.
         'rest_framework.permissions.AllowAny',
     ],
+    
     # Optional: Add default pagination, filtering, etc. here if desired
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10
 }
+
+# Optional: Define where users are redirected after login/logout via DRF's browsable API
+# LOGIN_REDIRECT_URL = '/' # Redirect to home page after login
+# LOGOUT_REDIRECT_URL = '/login.html' # Redirect to login page after logout
