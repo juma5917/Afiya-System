@@ -1,4 +1,4 @@
-# /home/juma-samwel-onyango/Software Engineering Intern Task/afiya_system/afiya/admin.py
+#@juma_samwel 
 from django.contrib import admin
 from .models import Program, Client # Import your models
 
@@ -21,7 +21,3 @@ class ClientAdmin(admin.ModelAdmin):
     search_fields = ('name', 'contact_info') # Enable searching
     list_filter = ('enrolled_programs',) # Allow filtering by enrolled programs
     filter_horizontal = ('enrolled_programs',) # Use a more user-friendly widget for ManyToMany
-
-# Alternatively, simpler registration without customization:
-# admin.site.register(Program)
-# admin.site.register(Client)

@@ -1,4 +1,6 @@
+# @JUMA_SAMWEL
 from django.db import models
+from django.contrib.auth.models import User
 
 class Program(models.Model):
     """
@@ -44,10 +46,17 @@ class Client(models.Model):
 
     def __str__(self):
         """String representation of the Client model."""
-        return f"{self.name} (ID: {self.id})" # Include ID for clarity
+        return f"{self.name} (ID: {self.id})" 
 
     class Meta:
-        ordering = ['name'] # Keep clients ordered alphabetically by default
+        ordering = ['name'] 
 
-    # Note: Business logic like 'enroll' is typically handled in views/serializers
-    # in Django REST Framework, as you've done in views.py.
+class Doctor(User):
+    """
+    Represents a doctor registered in the health system.
+    """
+
+    class Meta:
+        proxy = True  
+        verbose_name = "Doctor"
+        verbose_name_plural = "Doctors"

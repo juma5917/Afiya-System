@@ -71,12 +71,18 @@ CORS_ALLOWED_ORIGINS = [
 # Alternatively, for development only (less secure):
 # CORS_ALLOW_ALL_ORIGINS = True
 
+# Trust your frontend origin for CSRF purposes when credentials are involved
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+]
+
 ROOT_URLCONF = 'afiya_system.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [], # Add frontend build directory here if serving static frontend build
+        'DIRS': [BASE_DIR / 'frontend'], # Add frontend build directory here if serving static frontend build
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

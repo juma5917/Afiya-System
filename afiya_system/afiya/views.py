@@ -1,12 +1,14 @@
-# /home/juma-samwel-onyango/Software Engineering Intern Task/afiya_system/afiya/views.py
-
-from rest_framework import viewsets, status, serializers
+# @juma_samwel
+from rest_framework import viewsets, status, serializers, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 # Import permissions
 from rest_framework import permissions
-from .models import Program, Client
-from .serializers import ProgramSerializer, ClientSerializer, ClientEnrollmentSerializer
+from .models import Program, Client, Doctor
+from .serializers import ProgramSerializer, ClientSerializer, ClientEnrollmentSerializer, DoctorRegistrationSerializer, UserLoginSerializer
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth.models import User
 
 class ProgramViewSet(viewsets.ModelViewSet):
     """
@@ -91,16 +93,22 @@ class ClientViewSet(viewsets.ModelViewSet):
             return Response(response_serializer.data, status=status.HTTP_200_OK)
 
         except Program.DoesNotExist:
-            # This case should ideally be caught by the ClientEnrollmentSerializer's validation,
-            # but adding it here provides an extra layer of safety, especially if
-            # the program is deleted between validation and this point (race condition).
-            # Re-raise as a validation error for consistent API responses.
+            
             raise serializers.ValidationError(
                 {'program_id': f"Program with ID {program_id} not found."}
             )
 
-    # Requirement 5 (View Profile) is handled by the default 'retrieve' action
-    # provided by ModelViewSet: GET /afiya/clients/{client_pk}/
+class DoctorRegistrationView(generics.CreateAPIView):
+    """
+    API endpoint for doctor registration.
+    """
+    queryset = Doctor.objects.all() # Or User.objects.all()
+    serializer_class = DoctorRegistrationSerializer
+    permission_classes = [permissions.AllowAny] # Registration should be open to anyone
 
-    # Requirement 6 (Expose Profile via API) is inherently done by this ViewSet
-    # and its associated serializers and URL routing.
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({'message': 'Registration successful. You can now login.'}, status=status.HTTP_201_CREATED, headers=headers)
