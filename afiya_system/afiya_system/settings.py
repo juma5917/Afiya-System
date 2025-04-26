@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os # Import os module for path joining
+import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,13 +22,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-x0han4inmd=74p+ccx2u0=$%_x9879*ewfq@x^!!0*6=0^z69-' # NOTE: Replace with environment variable in production
+# Load SECRET_KEY from environment variable, with a default for local development (change the default!)
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-default-key-locally')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True # NOTE: Set to False in production
+# Load DEBUG from environment variable, defaulting to 'False' for safety
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# NOTE: Configure appropriately for production deployment
-ALLOWED_HOSTS = []
+# Load ALLOWED_HOSTS from environment variable (comma-separated string)
+# Example value in production: 'yourdomain.com,www.yourdomain.com,yourrenderapp.onrender.com'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -38,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles', # <--- Essential for static files
+    'whitenoise.runserver_nostatic', # Add whitenoise (before staticfiles)
+    'django.contrib.staticfiles', # Essential for static files
 
     # Third-party apps
     'rest_framework',           # Django REST Framework
@@ -52,8 +57,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Whitenoise Middleware should be placed high up, right after SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware', # Handles session auth
-    'corsheaders.middleware.CorsMiddleware', # Should be high up
+    'corsheaders.middleware.CorsMiddleware', # Should be high up, but after sessions/whitenoise if needed
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware', # Handles user auth
@@ -61,26 +68,18 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS Configuration - adjust origins as needed for your frontend deployment
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080", # Example: Common port for Vue/React dev servers
-    "http://127.0.0.1:8080",
-    "http://localhost:5500", # Example: Common port for VS Code Live Server
-    "http://127.0.0.1:5500",
-    "null", # Allow requests from file:// URLs (for simple local HTML files) - USE WITH CAUTION
-]
-# Alternatively, for development only (less secure):
-# CORS_ALLOW_ALL_ORIGINS = True
+# CORS Configuration - Load allowed origins from environment variable
+# Example value: 'http://localhost:5500,http://127.0.0.1:5500,https://yourfrontend.onrender.com'
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5500,http://127.0.0.1:5500').split(',')
 
 # Allow credentials (like cookies for session auth) to be sent from these origins
-CORS_ALLOW_CREDENTIALS = True # <--- Add this if using SessionAuthentication
+CORS_ALLOW_CREDENTIALS = True
 
 # Trust your frontend origin for CSRF purposes when credentials are involved
-CSRF_TRUSTED_ORIGINS = [
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-    # Add other frontend origins if needed
-]
+# Load trusted origins from environment variable
+# Example value: 'http://localhost:5500,https://yourbackend.onrender.com'
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:5500,http://localhost:5500').split(',')
+
 
 ROOT_URLCONF = 'afiya_system.urls'
 
@@ -88,6 +87,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         # Tell Django where to find your HTML templates (like index.html, login.html)
+        # Assuming they are in a 'frontend' directory at the project root
         'DIRS': [os.path.join(BASE_DIR, 'frontend')],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -106,12 +106,13 @@ WSGI_APPLICATION = 'afiya_system.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# NOTE: Use PostgreSQL or other robust DB for production
+# Use dj-database-url to parse the DATABASE_URL environment variable
+# Fallback to SQLite for local development if DATABASE_URL is not set
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600 # Optional: Number of seconds database connections should persist
+    )
 }
 
 
@@ -139,25 +140,32 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC' # Consider setting to your local timezone if appropriate
+# Consider setting to your local timezone, e.g., 'Africa/Nairobi'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = True # Recommended to keep True, especially with UTC
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/' # The URL prefix for static files
+STATIC_URL = '/static/' # The URL prefix for static files served
 
-# Directories where Django will look for static files (outside of app static/ dirs)
+# Directory where Django's `collectstatic` will gather static files for deployment
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Tell Whitenoise to use compressed static files and add cache-busting hashes
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Directories where Django will look for static files IN ADDITION to each app's 'static/' dir
+# Useful if you have a central 'static' or 'frontend/static' folder for project-wide assets
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend'), # <--- Add this line!
+    os.path.join(BASE_DIR, 'frontend'), # If 'frontend' contains static assets directly
+    # os.path.join(BASE_DIR, 'static'), # Or if you have a 'static' folder
 ]
 
-# Add STATIC_ROOT for production deployment with 'collectstatic'
-# STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -173,16 +181,21 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        # By default, allow any access unless overridden in a specific view.
-        # Your views override this with IsAuthenticated.
-        'rest_framework.permissions.AllowAny',
+        # By default, require authentication unless overridden in a specific view.
+        # This is generally safer than AllowAny. Your views already specify
+        # permissions, but this sets a secure default.
+        'rest_framework.permissions.IsAuthenticated',
+        # If you want AllowAny by default and secure views individually:
+        # 'rest_framework.permissions.AllowAny',
     ],
-    
+
     # Optional: Add default pagination, filtering, etc. here if desired
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10
 }
 
 # Optional: Define where users are redirected after login/logout via DRF's browsable API
+# LOGIN_URL = 'rest_framework:login' # Use DRF's login view
+# LOGOUT_URL = 'rest_framework:logout' # Use DRF's logout view
 # LOGIN_REDIRECT_URL = '/' # Redirect to home page after login
 # LOGOUT_REDIRECT_URL = '/login.html' # Redirect to login page after logout
