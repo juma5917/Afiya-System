@@ -1,3 +1,9 @@
+NOTE: POWERPOINT PRESENTATION LINK :  https://drive.google.com/file/d/1uyhryXBpatV1qiZAKh_gtqGcgCCJP5v_/view?usp=sharing
+
+NOTE: PLEASE CLONE MASTER BRANCH TO RUN CODE ON YOUR MACHINE
+
+
+
 # Afiya-System
 
 A basic health information system simulation allowing doctors to manage clients and health programs (like TB, HIV). Features include client registration, program enrollment, search, and profile viewing via a simple web interface and API.
