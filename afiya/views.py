@@ -137,13 +137,10 @@ class DoctorRegistrationView(generics.CreateAPIView):
         )
 
 # --- NEW LOGIN VIEW ---
-# Apply csrf_exempt to all methods handled by this view's dispatch method
-@method_decorator(csrf_exempt, name='dispatch')
 class UserLoginView(views.APIView):
     """
     API endpoint for user/doctor login.
     Returns auth token and user details upon successful login.
-    (CSRF protection disabled for this view - use with caution!)
     """
     permission_classes = [permissions.AllowAny] # Anyone can attempt to log in
     serializer_class = UserLoginSerializer # Use for input validation
@@ -168,4 +165,5 @@ class UserLoginView(views.APIView):
             'last_name': user.last_name
             # Add any other user details you need on the frontend
         }, status=status.HTTP_200_OK)
+
 # --- END NEW LOGIN VIEW ---
