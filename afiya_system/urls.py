@@ -10,6 +10,6 @@ urlpatterns = [
     # Serve index.html at the root URL
     path('', TemplateView.as_view(template_name='doctor_register.html'), name='home'),
     path('login', TemplateView.as_view(template_name='login.html'), name='login'),
-    path('index', TemplateView.as_view(template_name='index.html'), name='Dashboard'),
+    path('index.html', TemplateView.as_view(template_name='index.html'), name='Dashboard'),
 
 ]
