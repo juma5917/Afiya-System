@@ -81,8 +81,9 @@ function hideLoadingIndicator(element) { element?.classList.add('hidden'); }
 // --- API Call Function (Common) ---
 async function apiRequest(url, options = {}) {
     const csrfToken = getCookie('csrftoken'); // Get token
+    console.log("CSRF Token for Login:", csrfToken);
     // --- Add this console log ---
-    console.log(`apiRequest to ${url}: Using CSRF Token: ${csrfToken}`); // <-- This is the added line
+    console.log(`apiRequest to ${url}: Using CSRF Token: ${csrfToken}`);
     // ---------------------------
 
     const headers = {
