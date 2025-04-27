@@ -1,7 +1,7 @@
 // @JUMA_SAMWEL - Combined Frontend Logic
 
 // --- Configuration ---
-const API_BASE_URL = 'http://127.0.0.1:8000'; // Your Django backend URL
+const API_BASE_URL = 'https://juma-afiya-system.onrender.com'; // Your Django backend URL
 
 // --- Utility Functions (Common) ---
 
