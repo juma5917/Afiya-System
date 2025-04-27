@@ -1,5 +1,7 @@
 NOTE: POWERPOINT PRESENTATION LINK :  https://drive.google.com/file/d/1uyhryXBpatV1qiZAKh_gtqGcgCCJP5v_/view?usp=sharing
 
+LIVE DEMO LINK :  https://juma-afiya-system.onrender.com/
+
 NOTE: PLEASE CLONE MASTER BRANCH TO RUN CODE ON YOUR MACHINE
 
 
