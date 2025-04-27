@@ -1,10 +1,13 @@
 # @juma_samwel
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets, status, serializers, generics, views # Add views
 from rest_framework.decorators import action
 from rest_framework.response import Response
 # Import permissions
 from rest_framework import permissions
-from .models import Program, Client, Doctor
+from .models import Program, Client
 from .serializers import (
     ProgramSerializer,
     ClientSerializer,
@@ -13,8 +16,6 @@ from .serializers import (
     UserLoginSerializer # Keep this for validation
 )
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
-from django.contrib.auth import authenticate # Import authenticate
 from django.contrib.auth.models import User
 
 
@@ -136,10 +137,13 @@ class DoctorRegistrationView(generics.CreateAPIView):
         )
 
 # --- NEW LOGIN VIEW ---
+# Apply csrf_exempt to all methods handled by this view's dispatch method
+@method_decorator(csrf_exempt, name='dispatch')
 class UserLoginView(views.APIView):
     """
     API endpoint for user/doctor login.
     Returns auth token and user details upon successful login.
+    (CSRF protection disabled for this view - use with caution!)
     """
     permission_classes = [permissions.AllowAny] # Anyone can attempt to log in
     serializer_class = UserLoginSerializer # Use for input validation
@@ -164,5 +168,4 @@ class UserLoginView(views.APIView):
             'last_name': user.last_name
             # Add any other user details you need on the frontend
         }, status=status.HTTP_200_OK)
-
 # --- END NEW LOGIN VIEW ---
