@@ -13,11 +13,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -108,12 +110,27 @@ WSGI_APPLICATION = 'afiya_system.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 # Use dj-database-url to parse the DATABASE_URL environment variable
 # Fallback to SQLite for local development if DATABASE_URL is not set
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600 # Optional: Number of seconds database connections should persist
-    )
-}
+
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL, # Use the loaded DATABASE_URL
+            conn_max_age=600 # Optional: Number of seconds database connections should persist
+        )
+    }
+else:
+    # Fallback to SQLite if DATABASE_URL is not set in the environment
+    print("WARNING: DATABASE_URL not found in environment. Falling back to SQLite.")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
 
 
 # Password validation

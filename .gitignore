@@ -1,0 +1,18 @@
+# # Environments
+# .env
+# venv/
+# env/
+# *.pyc
+# __pycache__/
+
+# # Databases
+# db.sqlite3
+# db.sqlite3-journal # Add this if it appears
+# *.sql
+
+# # Static files (collected) - Render builds this on the server
+# staticfiles/
+
+# # OS generated files
+# .DS_Store
+# Thumbs.db
