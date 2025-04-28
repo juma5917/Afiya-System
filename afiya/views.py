@@ -1,7 +1,8 @@
 # @juma_samwel
 
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.shortcuts import render
 from rest_framework import viewsets, status, serializers, generics, views # Add views
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -17,6 +18,11 @@ from .serializers import (
 )
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
+
+@ensure_csrf_cookie
+def login_page_view(request):
+    """Ensures the CSRF cookie is set when serving the login page."""
+    return render(request, 'login.html')
 
 
 class ProgramViewSet(viewsets.ModelViewSet):
