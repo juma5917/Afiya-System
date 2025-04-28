@@ -117,14 +117,3 @@ If the project includes tests, you can run them using:
 bash
 python manage.py test
 You should now have the Afiya System running locally!
-
-
-
-
-![alt text](Afiya-1.png)
-![alt text](Afiya1.png)
-![alt text](Afiya2.png)
-![alt text](Afiya3.png)
-![alt text](Afiya4.png)
-![alt text](Afiya5.png)
-![alt text](Afiya6.png)
