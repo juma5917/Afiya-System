@@ -1,7 +1,7 @@
 // @JUMA_SAMWEL - Combined Frontend Logic
 
 // --- Configuration ---
-const API_BASE_URL = 'https://afiya-system-qj0ssn74r-juma5917s-projects.vercel.app/'; // Your Django backend URL
+const API_BASE_URL = 'https://juma-afiya-system.onrender.com'; // Your Django backend URL
 
 // --- Utility Functions (Common) ---
 
