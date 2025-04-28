@@ -2,8 +2,6 @@ NOTE: POWERPOINT PRESENTATION LINK :  https://drive.google.com/file/d/1uyhryXBpa
 
 LIVE DEMO LINK :  https://juma-afiya-system.onrender.com/
 
-NOTE: PLEASE CLONE MASTER BRANCH TO RUN CODE ON YOUR MACHINE
-
 
 
 # Afiya-System
