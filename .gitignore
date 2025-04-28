@@ -15,3 +15,4 @@ db.sqlite3-journal # Add this if it appears
 # OS generated files
 .DS_Store
 Thumbs.db
+.vercel
