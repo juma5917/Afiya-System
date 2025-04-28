@@ -6,15 +6,16 @@ set -e
 echo "Building static files..."
 
 # Ensure pip is up to date (optional, but can help)
-python3 -m pip install --upgrade pip
+# We can often remove this too, as the python builder likely uses an up-to-date pip
+# echo "Updating pip..."
+# python3 -m pip install --upgrade pip
 
-# Install dependencies (Vercel might do this automatically, but being explicit is safe)
-pip install -r requirements.txt # Usually not needed here if Vercel detects requirements.txt
+# Dependencies are installed by the @vercel/python build step defined in vercel.json
+# No need to run 'pip install -r requirements.txt' here.
 
 # Run Django collectstatic
-# This requires DJANGO_SETTINGS_MODULE to be set,
-# Vercel often sets this, but you might need to export it if you encounter issues.
-# export DJANGO_SETTINGS_MODULE=your_project_name.settings
+echo "Running collectstatic..."
 python3 manage.py collectstatic --noinput
 
 echo "Static files build finished."
+
