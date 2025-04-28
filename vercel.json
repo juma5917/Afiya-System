@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "builds": [
+    {
+    
+      "src": "staticfiles_build.sh",
+      "use": "@vercel/static-build",
+      "config": {
+        
+        "distDir": "staticfiles"
+      }
+    },
+    {
+      
+      "src": "afiya_system/wsgi.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "15mb", "runtime": "python3.9" } // Adjust runtime if needed
+    }
+  ],
+  "routes": [
+    {
+      
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+     
+      "src": "/(.*)",
+      "dest": "afiya_system/wsgi.py"
+    }
+  ]
+}
