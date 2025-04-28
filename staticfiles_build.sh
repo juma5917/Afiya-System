@@ -15,6 +15,6 @@ pip install -r requirements.txt # Usually not needed here if Vercel detects requ
 # This requires DJANGO_SETTINGS_MODULE to be set,
 # Vercel often sets this, but you might need to export it if you encounter issues.
 # export DJANGO_SETTINGS_MODULE=your_project_name.settings
-python manage.py collectstatic --noinput
+python3 manage.py collectstatic --noinput
 
 echo "Static files build finished."
