@@ -6,7 +6,7 @@ set -e
 echo "Building static files..."
 
 # Ensure pip is up to date (optional, but can help)
-python -m pip install --upgrade pip
+python3 -m pip install --upgrade pip
 
 # Install dependencies (Vercel might do this automatically, but being explicit is safe)
 pip install -r requirements.txt # Usually not needed here if Vercel detects requirements.txt
