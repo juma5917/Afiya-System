@@ -2,7 +2,7 @@ NOTE: POWERPOINT PRESENTATION LINK :  https://drive.google.com/file/d/1uyhryXBpa
 
 LIVE DEMO LINK :  https://juma-afiya-system.onrender.com/
 
-
+**Important Note for Live Demo Users:** While you can register a new doctor account on the live demo, newly registered accounts **cannot log in immediately**. Access to the dashboard and program features requires an authentication token that must be provided by the system administrator after registration. This is a security measure for the demo environment.
 
 # Afiya-System
 
