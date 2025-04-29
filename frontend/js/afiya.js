@@ -257,9 +257,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.non_field_errors ? errorData.non_field_errors.join(', ') : (errorData.detail || 'Invalid credentials'));
             }
     
-            // After successful login, fetch user details
-            const userResponse = await fetch(`${API_BASE_URL}/api-auth/user/`, {
-                credentials: 'include'
+            // After successful login, fetch user profile
+            const userResponse = await fetch(`${API_BASE_URL}/afiya/user/profile/`, {
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
             });
             
             if (!userResponse.ok) {
@@ -766,31 +769,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Authentication Check Function (Index Page) ---
     async function checkAuthentication() {
-         console.log("Checking authentication...");
-         try {
-             // Attempt to fetch a protected resource. apiRequest handles 401/403 redirect.
-             // Fetching user details might be better than programs if available
-             // Example: const user = await apiRequest(`${API_BASE_URL}/api/user/profile/`);
-             // For now, using programs as the check:
-             await apiRequest(`${API_BASE_URL}/afiya/programs/`);
-
-             console.log("Authentication successful. Loading app data.");
-             // Set welcome message (could fetch actual username later if API provides it)
-             if (welcomeMessage) {
-                const userData = JSON.parse(localStorage.getItem('userData')) || {};
-                welcomeMessage.textContent = `Welcome, ${userData.name || 'Doctor'}!`;
+        console.log("Checking authentication...");
+        try {
+            // Fetch user profile instead of programs
+            const userData = await apiRequest(`${API_BASE_URL}/afiya/user/profile/`);
+            
+            // Store user data
+            localStorage.setItem('userData', JSON.stringify({
+                name: userData.first_name ? 
+                      `Dr. ${userData.first_name} ${userData.last_name}` : 
+                      userData.username,
+                username: userData.username,
+                id: userData.id
+            }));
+    
+            // Set welcome message
+            if (welcomeMessage) {
+                const storedData = JSON.parse(localStorage.getItem('userData'));
+                welcomeMessage.textContent = `Welcome, ${storedData.name}!`;
             }
-             // Load initial data for the index page
-             fetchPrograms(true); // Fetch programs and populate dropdown
-             fetchClients();     // Fetch clients
-
-         } catch (error) {
-             // Error handling (including redirect) is done within apiRequest
-             console.error("Initial authentication check failed or caused redirect:", error.message);
-             // No further action needed here as apiRequest handles the redirect flow
-         }
-     }
-
+    
+            // Load initial data
+            fetchPrograms(true);
+            fetchClients();
+    
+        } catch (error) {
+            console.error("Authentication check failed:", error.message);
+        }
+    }
     // --- Event Listener Setup ---
 
     // Login Page

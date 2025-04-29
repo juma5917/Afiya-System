@@ -18,6 +18,8 @@ from .serializers import (
 )
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 @ensure_csrf_cookie
 def login_page_view(request):
@@ -173,3 +175,17 @@ class UserLoginView(views.APIView):
         }, status=status.HTTP_200_OK)
 
 # --- END NEW LOGIN VIEW ---
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email
+        }
+        return Response(data)
