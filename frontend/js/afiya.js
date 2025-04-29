@@ -236,40 +236,54 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         setButtonLoading(loginSubmitBtn, true);
         showFormStatus(loginStatus, 'Logging in...', true);
-
+    
         const username = loginUsernameInput.value;
         const password = loginPasswordInput.value;
-
+    
         try {
-            // Use the URL provided by rest_framework.urls
-            const response = await fetch(`${API_BASE_URL}/api-auth/login/`, {
+            // First, perform login
+            const loginResponse = await fetch(`${API_BASE_URL}/api-auth/login/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken') // Required for POST
+                    'X-CSRFToken': getCookie('csrftoken')
                 },
                 body: JSON.stringify({ username: username, password: password }),
                 credentials: 'include'
             });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ detail: `Login failed with status: ${response.status}` }));
+    
+            if (!loginResponse.ok) {
+                const errorData = await loginResponse.json().catch(() => ({ detail: `Login failed with status: ${loginResponse.status}` }));
                 throw new Error(errorData.non_field_errors ? errorData.non_field_errors.join(', ') : (errorData.detail || 'Invalid credentials'));
             }
-
-            // Login successful! Browser now has the session cookie.
-            // Redirect to the main application page.
-            localStorage.setItem('userData', JSON.stringify({ name: 'Juma' }));
-            window.location.href = 'index.html'; // Redirect to your main app page
-
+    
+            // After successful login, fetch user details
+            const userResponse = await fetch(`${API_BASE_URL}/api-auth/user/`, {
+                credentials: 'include'
+            });
+            
+            if (!userResponse.ok) {
+                throw new Error('Failed to fetch user details');
+            }
+    
+            const userData = await userResponse.json();
+            
+            // Store user data with actual name
+            localStorage.setItem('userData', JSON.stringify({
+                name: userData.first_name ? `Dr. ${userData.first_name} ${userData.last_name}` : userData.username,
+                username: userData.username,
+                id: userData.id
+            }));
+    
+            // Redirect to main application page
+            window.location.href = 'index.html';
+    
         } catch (error) {
             console.error('Login Error:', error);
             showFormStatus(loginStatus, `Login failed: ${error.message}`, false);
-            setButtonLoading(loginSubmitBtn, false); // Re-enable button on error
+            setButtonLoading(loginSubmitBtn, false);
         }
-        // No finally block needed here for button state if redirecting on success
     }
-
 
     // --- Registration Handler ---
     async function handleRegistration(event) {
