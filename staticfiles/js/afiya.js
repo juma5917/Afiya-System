@@ -260,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Login successful! Browser now has the session cookie.
             // Redirect to the main application page.
+            localStorage.setItem('userData', JSON.stringify({ name: 'Juma' }));
             window.location.href = 'index.html'; // Redirect to your main app page
 
         } catch (error) {
@@ -762,7 +763,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
              console.log("Authentication successful. Loading app data.");
              // Set welcome message (could fetch actual username later if API provides it)
-             if (welcomeMessage) welcomeMessage.textContent = `Welcome, Doctor!`; // Placeholder
+             if (welcomeMessage) {
+                const userData = JSON.parse(localStorage.getItem('userData')) || {};
+                welcomeMessage.textContent = `Welcome, ${userData.name || 'Doctor'}!`;
+            }
+     // Placeholder
 
              // Load initial data for the index page
              fetchPrograms(true); // Fetch programs and populate dropdown

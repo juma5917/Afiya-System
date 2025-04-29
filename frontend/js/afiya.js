@@ -259,6 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Login successful! Browser now has the session cookie.
             // Redirect to the main application page.
+            localStorage.setItem('userData', JSON.stringify({ name: 'Juma' }));
             window.location.href = 'index.html'; // Redirect to your main app page
 
         } catch (error) {
