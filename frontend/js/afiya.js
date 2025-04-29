@@ -256,7 +256,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const errorData = await loginResponse.json().catch(() => ({ detail: `Login failed with status: ${loginResponse.status}` }));
                 throw new Error(errorData.non_field_errors ? errorData.non_field_errors.join(', ') : (errorData.detail || 'Invalid credentials'));
             }
-    
+             // Clear any existing user data from localStorage
+            localStorage.removeItem('userData');
+
             // After successful login, fetch user profile
             const userResponse = await fetch(`${API_BASE_URL}/afiya/user/profile/`, {
             credentials: 'include',
@@ -275,7 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('userData', JSON.stringify({
                 name: userData.first_name ? `Dr. ${userData.first_name} ${userData.last_name}` : userData.username,
                 username: userData.username,
-                id: userData.id
+                id: userData.id,
+                timestamp: new Date().getTime()
             }));
     
             // Redirect to main application page
@@ -780,15 +783,16 @@ document.addEventListener('DOMContentLoaded', () => {
                       `Dr. ${userData.first_name} ${userData.last_name}` : 
                       userData.username,
                 username: userData.username,
-                id: userData.id
+                id: userData.id,
+                timestamp: new Date().getTime()
             }));
     
-            // Set welcome message
+            // Set welcome message with fresh data
             if (welcomeMessage) {
-                const storedData = JSON.parse(localStorage.getItem('userData'));
-                welcomeMessage.textContent = `Welcome, ${storedData.name}!`;
-            }
-    
+                welcomeMessage.textContent = `Welcome, ${userData.first_name && userData.last_name ? 
+                                       `Dr. ${userData.first_name} ${userData.last_name}` : 
+                                       userData.username}!`;
+                }
             // Load initial data
             fetchPrograms(true);
             fetchClients();
