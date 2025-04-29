@@ -237,8 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setButtonLoading(loginSubmitBtn, true);
         showFormStatus(loginStatus, 'Logging in...', true);
     
-        const username = loginUsernameInput.value;
-        const password = loginPasswordInput.value;
     
         try {
             // First, perform login
