@@ -263,7 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const userResponse = await fetch(`${API_BASE_URL}/afiya/user/profile/`, {
             credentials: 'include',
             headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache'
             }
             });
             
@@ -275,7 +276,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Store user data with actual name
             localStorage.setItem('userData', JSON.stringify({
-                name: userData.first_name ? `Dr. ${userData.first_name} ${userData.last_name}` : userData.username,
+                name: userData.first_name && userData.last_name ? 
+                      `Dr. ${userData.first_name} ${userData.last_name}` : 
+                      userData.username,
                 username: userData.username,
                 id: userData.id,
                 timestamp: new Date().getTime()
@@ -774,12 +777,25 @@ document.addEventListener('DOMContentLoaded', () => {
     async function checkAuthentication() {
         console.log("Checking authentication...");
         try {
-            // Fetch user profile instead of programs
+            // Always fetch fresh user data
             const userData = await apiRequest(`${API_BASE_URL}/afiya/user/profile/`);
+            console.log("Received user data:", userData); // Debug log
             
-            // Store user data
+            // Clear any existing data first
+            localStorage.removeItem('userData');
+            
+            // Set welcome message directly from the API response
+            if (welcomeMessage) {
+                const displayName = userData.first_name && userData.last_name ? 
+                    `Dr. ${userData.first_name} ${userData.last_name}` : 
+                    userData.username;
+                welcomeMessage.textContent = `Welcome, ${displayName}!`;
+                console.log("Setting welcome message to:", displayName); // Debug log
+            }
+    
+            // Store fresh user data
             localStorage.setItem('userData', JSON.stringify({
-                name: userData.first_name ? 
+                name: userData.first_name && userData.last_name ? 
                       `Dr. ${userData.first_name} ${userData.last_name}` : 
                       userData.username,
                 username: userData.username,
@@ -787,18 +803,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 timestamp: new Date().getTime()
             }));
     
-            // Set welcome message with fresh data
-            if (welcomeMessage) {
-                welcomeMessage.textContent = `Welcome, ${userData.first_name && userData.last_name ? 
-                                       `Dr. ${userData.first_name} ${userData.last_name}` : 
-                                       userData.username}!`;
-                }
             // Load initial data
             fetchPrograms(true);
             fetchClients();
     
         } catch (error) {
             console.error("Authentication check failed:", error.message);
+            // Clear potentially stale data
+            localStorage.removeItem('userData');
+            if (error.message.includes('Authentication required') || error.message.includes('session expired')) {
+                window.location.href = 'login.html';
+            }
         }
     }
     // --- Event Listener Setup ---
