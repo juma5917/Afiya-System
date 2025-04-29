@@ -176,7 +176,7 @@ class UserLoginView(views.APIView):
 
 # --- END NEW LOGIN VIEW ---
 
-class UserProfileView(APIView):
+class UserProfileView(views.APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
